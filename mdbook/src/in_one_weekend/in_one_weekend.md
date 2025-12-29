@@ -113,3 +113,38 @@ material 설정
 ## ch14
 
 씬배치
+
+- 상속 개념
+  - ref: https://zig.news/yglcode/code-study-interface-idiomspatterns-in-zig-standard-libraries-4lkj
+  - tagged union - 컴파일 시점이라면 이쪽이 오버헤드없음
+  - vtable 이건 뭐 cpp방식
+- inline else - https://zig.news/kristoff/easy-interfaces-with-zig-0100-2hc5
+  - switch에서 inline else와 else와 다르네
+
+``` zig
+// 복사 차이 모르면 버그 발생한다
+
+const Mat = union(enum) {
+    lambertian: Mat_Lambertian,
+    metal: Mat_Metal,
+    dielectric: Mat_Dielectric,
+
+    pub fn Convert(self: *const Mat) Material {
+        return switch (self.*) {
+            inline else => |*x| x.ToMaterial(),
+        };
+    }
+};
+
+const Mat = union(enum) {
+    lambertian: Mat_Lambertian,
+    metal: Mat_Metal,
+    dielectric: Mat_Dielectric,
+
+    pub fn Convert(self: Mat) Material {
+        return switch (self) {
+            inline else => |x| x.ToMaterial(),
+        };
+    }
+};
+``` 
