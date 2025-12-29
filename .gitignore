@@ -1,0 +1,6 @@
+.vs/
+int/
+out/
+zig-out/
+.zig-cache/
+*.ppm
