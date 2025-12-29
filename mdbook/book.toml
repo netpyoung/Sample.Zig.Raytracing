@@ -1,0 +1,12 @@
+[book]
+title = "Sample.Zig.RayTracing"
+description = "Sample.Zig.RayTracing"
+language = "ko"
+src = "src"
+
+[output.html]
+no-section-label = true
+site-url = "/Sample.Zig.RayTracing/"
+git-repository-url = "https://github.com/netpyoung/Sample.Zig.RayTracing"
+git-repository-icon = "fab-github"
+edit-url-template = "https://github.com/netpyoung/Sample.Zig.RayTracing/mdbook/edit/main/{path}"
