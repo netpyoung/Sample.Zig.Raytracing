@@ -28,3 +28,8 @@ URL (book): https://raytracing.github.io/books/raytracinginoneweekend.html
 > zig version
 0.15.2
 ```
+
+### 기타
+
+- @setFloatMode도 있지만, 사라질거네
+  - https://github.com/ziglang/zig/issues/23173
