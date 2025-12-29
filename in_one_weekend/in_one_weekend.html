@@ -44,7 +44,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-4d72678a.js";
+            window.path_to_searchindex_js = "../searchindex-81b8dacc.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-c293cf20.js"></script>
@@ -330,6 +330,46 @@
 </ul>
 <h2 id="ch14"><a class="header" href="#ch14">ch14</a></h2>
 <p>씬배치</p>
+<ul>
+<li>상속 개념
+<ul>
+<li>ref: https://zig.news/yglcode/code-study-interface-idiomspatterns-in-zig-standard-libraries-4lkj</li>
+<li>tagged union - 컴파일 시점이라면 이쪽이 오버헤드없음</li>
+<li>vtable 이건 뭐 cpp방식</li>
+</ul>
+</li>
+<li>inline else - https://zig.news/kristoff/easy-interfaces-with-zig-0100-2hc5
+<ul>
+<li>switch에서 inline else와 else와 다르네</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-zig">// 복사 차이 모르면 버그 발생한다
+
+const Mat = union(enum) {
+    lambertian: Mat_Lambertian,
+    metal: Mat_Metal,
+    dielectric: Mat_Dielectric,
+
+    pub fn Convert(self: *const Mat) Material {
+        return switch (self.*) {
+            inline else =&gt; |*x| x.ToMaterial(),
+        };
+    }
+};
+
+const Mat = union(enum) {
+    lambertian: Mat_Lambertian,
+    metal: Mat_Metal,
+    dielectric: Mat_Dielectric,
+
+    pub fn Convert(self: Mat) Material {
+        return switch (self) {
+            inline else =&gt; |x| x.ToMaterial(),
+        };
+    }
+};
+</code></pre>
 
                     </main>
 
