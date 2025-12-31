@@ -2,6 +2,7 @@
 
 - [Ray Tracing in One Weekend — The Book Series](https://raytracing.github.io/)
   - [소스](https://github.com/RayTracing/raytracing.github.io/tree/release/src)
+  - [Further-Readings](https://github.com/RayTracing/raytracing.github.io/wiki/Further-Readings)
   - [Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
   - [Ray Tracing: The Next Week](https://raytracing.github.io/books/RayTracingTheNextWeek.html)
   - [Ray Tracing: The Rest of Your Life](https://raytracing.github.io/books/RayTracingTheRestOfYourLife.html)
@@ -27,6 +28,10 @@
 - Cpp
   - <https://github.com/multitudes/Ray-Tracing-in-One-Weekend-in-C>
 
+### 기타2
+
+- https://github.com/kooparse/zalgebra
+- https://github.com/zigimg/zigimg
 
 ## Demo
 
