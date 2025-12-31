@@ -4,8 +4,9 @@ Sample project to implement raytracing in one weekend using zig
 
 - [Page](https://netpyoung.github.io/Sample.Zig.Raytracing/)
 
+![](./mdbook/src/res/image.bmp)
 
-## Ray Tracing in One Weekend
+## based on Ray Tracing in One Weekend
 
 - [_Ray Tracing in One Weekend_](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
   - [CC0](https://github.com/RayTracing/raytracing.github.io/blob/release/COPYING.txt)
