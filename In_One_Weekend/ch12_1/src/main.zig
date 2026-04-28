@@ -11,9 +11,8 @@ const Mat_Metal = @import("impl/Mat_Metal.zig");
 const Mat_Dielectric = @import("impl/Mat_Dielectric.zig");
 const Rtweekend = @import("impl/Rtweekend.zig");
 
-pub fn main() !void {
-    const allocator = init_allocator();
-    defer deinit_allocator();
+pub fn main(init: std.process.Init) !void {
+    const allocator = init.gpa;
 
     var world: HittableList = HittableList.init();
     defer world.deinit(allocator);
@@ -37,32 +36,7 @@ pub fn main() !void {
     cam.max_depth = 50;
     // ch11_1
     cam.vfov = 90;
-    try cam.render(world.hittable());
-}
-
-// ======================================================================
-// ======================================================================
-
-var gpa_instance = std.heap.GeneralPurposeAllocator(.{
-    .thread_safe = true,
-    .never_unmap = true,
-    .retain_metadata = true,
-    .stack_trace_frames = 16,
-}){};
-
-fn init_allocator() std.mem.Allocator {
-    if (builtin.mode == .Debug or builtin.mode == .ReleaseSafe) {
-        return gpa_instance.allocator();
-    } else {
-        return std.heap.page_allocator;
-    }
-}
-
-fn deinit_allocator() void {
-    if (builtin.mode == .Debug or builtin.mode == .ReleaseSafe) {
-        const leaked = gpa_instance.deinit();
-        if (leaked == .leak) {
-            std.debug.print("\nMemory leak detected!\n", .{});
-        }
-    }
+    var console = std.Io.File.stdout().writer(init.io, &.{});
+    const stdout = &console.interface;
+    try cam.render(world.hittable(), stdout);
 }

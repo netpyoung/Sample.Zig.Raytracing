@@ -75,11 +75,8 @@ fn initialize(camera: *Camera) void {
     camera.pixel_samples_scale = 1.0 / @as(f64, @floatFromInt(camera.samples_per_pixel));
 }
 
-pub fn render(camera: *Camera, world: Hittable) !void {
+pub fn render(camera: *Camera, world: Hittable, stdout: *std.Io.Writer) !void {
     camera.initialize();
-
-    var console = std.fs.File.stdout().writer(&.{});
-    const stdout = &console.interface;
 
     try stdout.print("P3\n{} {}\n255\n", .{ camera.image_width, camera.image_height });
 

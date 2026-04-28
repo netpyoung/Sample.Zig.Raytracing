@@ -16,7 +16,7 @@ const Rtweekend = @import("impl/Rtweekend.zig");
 fn ray_color(r: Ray, world: *HittableList) color {
     var rec: HitRecord = undefined;
     var hittable = world.hittable();
-    
+
     if (hittable.hit(r, Interval.init(0, Rtweekend.INFINITY), &rec)) {
         return rec.normal.add(1).mul(0.5);
     }
@@ -31,9 +31,8 @@ fn ray_color(r: Ray, world: *HittableList) color {
     return blendedValue;
 }
 
-pub fn main() !void {
-    const allocator = init_allocator();
-    defer deinit_allocator();
+pub fn main(init: std.process.Init) !void {
+    const allocator = init.gpa;
 
     var world: HittableList = HittableList.init();
     defer world.deinit(allocator);
@@ -43,7 +42,7 @@ pub fn main() !void {
     world.add(allocator, s1.hittable());
     world.add(allocator, s2.hittable());
 
-    var console = std.fs.File.stdout().writer(&.{});
+    var console = std.Io.File.stdout().writer(init.io, &.{});
     const stdout = &console.interface;
 
     // Image
@@ -79,31 +78,4 @@ pub fn main() !void {
         }
     }
     std.log.info("\rDone.                 ", .{});
-}
-
-// ======================================================================
-// ======================================================================
-
-var gpa_instance = std.heap.GeneralPurposeAllocator(.{
-    .thread_safe = true,
-    .never_unmap = true,
-    .retain_metadata = true,
-    .stack_trace_frames = 16,
-}){};
-
-fn init_allocator() std.mem.Allocator {
-    if (builtin.mode == .Debug or builtin.mode == .ReleaseSafe) {
-        return gpa_instance.allocator();
-    } else {
-        return std.heap.page_allocator;
-    }
-}
-
-fn deinit_allocator() void {
-    if (builtin.mode == .Debug or builtin.mode == .ReleaseSafe) {
-        const leaked = gpa_instance.deinit();
-        if (leaked == .leak) {
-            std.debug.print("\nMemory leak detected!\n", .{});
-        }
-    }
 }

@@ -27,7 +27,7 @@ pub fn build(b: *std.Build) void {
     const run_step = b.step("run", "Run the app");
     // run_step.dependOn(&run_cmd.step);
     {
-        const output_file = run_cmd.captureStdOut();
+        const output_file = run_cmd.captureStdOut(.{});
         const install_file = b.addInstallBinFile(output_file, "image.ppm");
         run_step.dependOn(&install_file.step);
     }

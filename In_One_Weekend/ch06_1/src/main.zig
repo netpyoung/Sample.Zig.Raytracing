@@ -60,8 +60,8 @@ fn ray_color(r: Ray) color {
     return blendedValue;
 }
 
-pub fn main() !void {
-    var console = std.fs.File.stdout().writer(&.{});
+pub fn main(init: std.process.Init) !void {
+    var console = std.Io.File.stdout().writer(init.io, &.{});
     const stdout = &console.interface;
 
     // Image

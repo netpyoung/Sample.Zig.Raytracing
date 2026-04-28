@@ -6,20 +6,19 @@ const color = @import("impl/vec3.zig").color;
 const vec3 = @import("impl/vec3.zig").vec3;
 const Color = @import("impl/Color.zig");
 
-
 fn hit_sphere(center: point3, radius: f64, ray: Ray) bool {
     const C = center;
     const r = radius;
     const Q = ray.origin;
     const d = ray.direction;
-    
+
     // r^2 = (C ? P)^2
     //
     // P(t) = (Q + t*d)
     //
     // r^2 = (C ? (Q + t*d))^2
     //
-    // 0 = t^2*d^2 - 2td*(C-Q) + (C-Q)^2 - r^2 
+    // 0 = t^2*d^2 - 2td*(C-Q) + (C-Q)^2 - r^2
     //
     // 0 = a*x^2 + b*x + c
     //
@@ -39,7 +38,6 @@ fn hit_sphere(center: point3, radius: f64, ray: Ray) bool {
     return hasSolution;
 }
 
-
 fn ray_color(r: Ray) color {
     if (hit_sphere(point3.init(0, 0, -1), 0.5, r)) {
         return color.init(1, 0, 0);
@@ -55,8 +53,8 @@ fn ray_color(r: Ray) color {
     return blendedValue;
 }
 
-pub fn main() !void {
-    var console = std.fs.File.stdout().writer(&.{});
+pub fn main(init: std.process.Init) !void {
+    var console = std.Io.File.stdout().writer(init.io, &.{});
     const stdout = &console.interface;
 
     // Image

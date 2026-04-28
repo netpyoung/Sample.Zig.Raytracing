@@ -3,10 +3,10 @@
 const color = @import("impl/vec3.zig").color;
 const Color = @import("impl/Color.zig");
 
-pub fn main() !void {
+pub fn main(init: std.process.Init) !void {
     const image_width = 256;
     const image_height = 256;
-    var console = std.fs.File.stdout().writer(&.{});
+    var console = std.Io.File.stdout().writer(init.io, &.{});
     const stdout = &console.interface;
 
     try stdout.print("P3\n{} {}\n255\n", .{ image_width, image_height });

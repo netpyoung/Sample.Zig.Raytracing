@@ -61,11 +61,8 @@ fn initialize(camera: *Camera) void {
     camera.pixel00_loc = pixel00_loc;
 }
 
-pub fn render(camera: *Camera, world: Hittable) !void {
+pub fn render(camera: *Camera, world: Hittable, stdout: *std.Io.Writer) !void {
     camera.initialize();
-
-    var console = std.fs.File.stdout().writer(&.{});
-    const stdout = &console.interface;
 
     try stdout.print("P3\n{} {}\n255\n", .{ camera.image_width, camera.image_height });
 
