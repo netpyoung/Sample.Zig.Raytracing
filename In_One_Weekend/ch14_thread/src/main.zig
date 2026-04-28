@@ -25,9 +25,8 @@ const Mat = union(enum) {
     }
 };
 
-pub fn main() !void {
-    const allocator = init_allocator();
-    defer deinit_allocator();
+pub fn main(init: std.process.Init) !void {
+    const allocator = init.gpa;
 
     var world: HittableList = HittableList.init();
     defer world.deinit(allocator);
@@ -137,10 +136,10 @@ pub fn main() !void {
 
     //var cam = Camera.init(16.0 / 9.0, 1200);
     //cam.samples_per_pixel = 500;
-    var cam = Camera.init(16.0 / 9.0, 800);
-    cam.samples_per_pixel = 400;
-    //var cam = Camera.init(16.0 / 9.0, 200);
-    //cam.samples_per_pixel = 10;
+    //var cam = Camera.init(16.0 / 9.0, 800);
+    //cam.samples_per_pixel = 400;
+    var cam = Camera.init(16.0 / 9.0, 200);
+    cam.samples_per_pixel = 10;
     cam.max_depth = 50;
     cam.vfov = 20;
     cam.lookfrom = point3.init(13, 2, 3);
@@ -148,35 +147,8 @@ pub fn main() !void {
     cam.vup = vec3.init(0, 1, 0);
     cam.defocus_angle = 0.6;
     cam.focus_dist = 10.0;
-    //try cam.renderP6WithThread(allocator, world.hittable());
-    try cam.renderBmpWithThread(allocator, world.hittable());
-    //try cam.renderOrigin(world.hittable());
-    
-}
 
-// ======================================================================
-// ======================================================================
-
-var gpa_instance = std.heap.GeneralPurposeAllocator(.{
-    .thread_safe = true,
-    .never_unmap = true,
-    .retain_metadata = true,
-    .stack_trace_frames = 16,
-}){};
-
-fn init_allocator() std.mem.Allocator {
-    if (builtin.mode == .Debug or builtin.mode == .ReleaseSafe) {
-        return gpa_instance.allocator();
-    } else {
-        return std.heap.page_allocator;
-    }
-}
-
-fn deinit_allocator() void {
-    if (builtin.mode == .Debug or builtin.mode == .ReleaseSafe) {
-        const leaked = gpa_instance.deinit();
-        if (leaked == .leak) {
-            std.debug.print("\nMemory leak detected!\n", .{});
-        }
-    }
+    //try cam.renderP6WithThread(allocator, world.hittable(), init.io);
+    try cam.renderBmpWithThread(allocator, world.hittable(), init.io);
+    //try cam.renderOrigin(world.hittable(), init.io);
 }

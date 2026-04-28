@@ -109,23 +109,26 @@ fn initialize(camera: *Camera) void {
     camera.pixel_samples_scale = 1.0 / @as(f64, @floatFromInt(camera.samples_per_pixel));
 }
 
-fn writeU16(w: *std.io.Writer, v: u16) !void {
+fn writeU16(w: *std.Io.Writer, v: u16) !void {
     try w.writeByte(@intCast(v & 0xFF));
     try w.writeByte(@intCast((v >> 8) & 0xFF));
 }
 
-fn writeU32(w: *std.io.Writer, v: u32) !void {
+fn writeU32(w: *std.Io.Writer, v: u32) !void {
     try w.writeByte(@intCast(v & 0xFF));
     try w.writeByte(@intCast((v >> 8) & 0xFF));
     try w.writeByte(@intCast((v >> 16) & 0xFF));
     try w.writeByte(@intCast((v >> 24) & 0xFF));
 }
 
-pub fn renderBmpWithThread(camera: *Camera, allocator: std.mem.Allocator, world: Hittable) !void {
+pub fn renderBmpWithThread(camera: *Camera, allocator: std.mem.Allocator, world: Hittable, io: std.Io) !void {
     camera.initialize();
 
     const totalItems = camera.image_height;
-    const progress = std.Progress.start(.{
+
+    var console = std.Io.File.stdout().writer(io, &.{});
+    const out = &console.interface;
+    const progress = std.Progress.start(io, .{
         .root_name = "rendering",
         .estimated_total_items = totalItems,
     });
@@ -134,12 +137,15 @@ pub fn renderBmpWithThread(camera: *Camera, allocator: std.mem.Allocator, world:
     const outBuff: [][3]u8 = try allocator.alloc([3]u8, camera.image_width * camera.image_height);
     defer allocator.free(outBuff);
 
-    var pool: std.Thread.Pool = undefined;
-    try pool.init(.{ .allocator = allocator });
-    var wg: std.Thread.WaitGroup = .{};
+    var thread_ctx: std.Io.Threaded = .init_single_threaded;
+    defer thread_ctx.deinit();
+    const thread_io = thread_ctx.io();
+
+    var group: std.Io.Group = .init;
+    defer group.cancel(thread_io);
 
     for (0..camera.image_height) |y| {
-        pool.spawnWg(&wg, renderRow, .{
+        group.async(thread_io, renderRow, .{
             progress,
             outBuff,
             camera,
@@ -147,10 +153,7 @@ pub fn renderBmpWithThread(camera: *Camera, allocator: std.mem.Allocator, world:
             world,
         });
     }
-    pool.waitAndWork(&wg);
-
-    var console = std.fs.File.stdout().writer(&.{});
-    const out = &console.interface;
+    try group.await(thread_io);
 
     //const bytes: []const u8 = std.mem.sliceAsBytes(outBuff);
     const width = camera.image_width;
@@ -201,11 +204,14 @@ pub fn renderBmpWithThread(camera: *Camera, allocator: std.mem.Allocator, world:
     try out.flush();
 }
 
-pub fn renderP6WithThread(camera: *Camera, allocator: std.mem.Allocator, world: Hittable) !void {
+pub fn renderP6WithThread(camera: *Camera, allocator: std.mem.Allocator, world: Hittable, io: std.Io) !void {
     camera.initialize();
 
     const totalItems = camera.image_height;
-    const progress = std.Progress.start(.{
+
+    var console = std.Io.File.stdout().writer(io, &.{});
+    const out = &console.interface;
+    const progress = std.Progress.start(io, .{
         .root_name = "rendering",
         .estimated_total_items = totalItems,
     });
@@ -229,8 +235,6 @@ pub fn renderP6WithThread(camera: *Camera, allocator: std.mem.Allocator, world: 
     }
     pool.waitAndWork(&wg);
 
-    var console = std.fs.File.stdout().writer(&.{});
-    const out = &console.interface;
     try out.print("P6\n{} {}\n255\n", .{ camera.image_width, camera.image_height });
     try out.writeAll(std.mem.sliceAsBytes(outBuff));
     try out.flush();
@@ -251,13 +255,12 @@ fn renderRow(progress: std.Progress.Node, outBuff: [][3]u8, camera: *Camera, y: 
     }
 }
 
-pub fn renderOrigin(camera: *Camera, world: Hittable) !void {
+pub fn renderOrigin(camera: *Camera, world: Hittable, io: std.Io) !void {
     camera.initialize();
 
-    var console = std.fs.File.stdout().writer(&.{});
-    const stdout = &console.interface;
-
-    try stdout.print("P3\n{} {}\n255\n", .{ camera.image_width, camera.image_height });
+    var console = std.Io.File.stdout().writer(io, &.{});
+    const out = &console.interface;
+    try out.print("P3\n{} {}\n255\n", .{ camera.image_width, camera.image_height });
 
     for (0..camera.image_height) |y| {
         //std.log.info("\rScanlines remaining: {}", .{camera.image_height - y});
@@ -269,7 +272,7 @@ pub fn renderOrigin(camera: *Camera, world: Hittable) !void {
                 // const perc: f64 = @ceil((@as(f64, @floatFromInt(x)) / @as(f64, @floatFromInt(camera.image_width)) * 5.0)) / 5.0;
                 pixel_color = color.add(pixel_color, ray_color(r, camera.max_depth - 1, &world));
             }
-            try Color.write_color(stdout, vec3.mul(pixel_color, camera.pixel_samples_scale));
+            try Color.write_color(out, vec3.mul(pixel_color, camera.pixel_samples_scale));
         }
     }
     std.log.info("\rDone.                 ", .{});
