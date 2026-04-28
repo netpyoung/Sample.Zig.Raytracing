@@ -27,7 +27,11 @@ URL (book): https://raytracing.github.io/books/raytracinginoneweekend.html
 
 ``` cmd
 > zig version
-0.15.2
+0.16.0
+```
+
+``` cmd
+> zig build run -Doptimize=ReleaseFast
 ```
 
 ### 기타
